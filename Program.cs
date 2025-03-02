@@ -1,33 +1,63 @@
-﻿using System;
+﻿namespace Task_7_2;
 
-public class Product
+public class InkReservior
 {
-    public string Name;
-    public int Price;
-    public int StockQuantity;
+    private string Color { get; set; }
+    private double InkAmount { get; set; }
 
-    public Product(string Name, int Price, int StockQuantity)
+    public InkReservior(string color, double inkAmount)
     {
-        this.Name = Name;
-        this.Price = Price;
-        this.StockQuantity = StockQuantity;
+        Color = color;
+        InkAmount = inkAmount;
     }
 
-    public void Display()
+    public static InkReservior operator +(InkReservior a, InkReservior b)
     {
-        Console.WriteLine($"Product Name: {this.Name} Price: {this.Price} Stock Quantity: {this.StockQuantity}");
+        if (a.Color == b.Color)
+        {
+            double NewInk = a.InkAmount + b.InkAmount;
+            return new InkReservior(a.Color, NewInk);
+        }
+        else
+        {
+            Console.Write("the colors are not the same");
+            return a;
+        }
+
     }
+
+    public static InkReservior operator -(InkReservior a, double amount)
+    {
+        double amountOfInk =a.InkAmount - amount;
+        if (amountOfInk >= 0)
+        {
+            return new InkReservior(a.Color, amountOfInk);
+        }
+        else
+        {
+            Console.Write("the ink`s amount is not valid");
+            return a;
+        }
+    }
+
+    public override string ToString()
+    {
+        return $"Color: {Color}, InkAmount: {InkAmount}";
+    }
+    
 }
 
 class Program
 {
-    public static void Main()
+    static void Main()
     {
-        Product product1 = new Product(" Apple", 200, 5);
-        Product product2 = new Product(" Orange", 300, 3);
-        Product product3 = new Product(" banana", 400, 10);
-        product1.Display();
-        product2.Display();
-        product3.Display();
+        InkReservior inkReservior1 = new InkReservior("Red", 5.0);
+        InkReservior inkReservior2 = new InkReservior("Green", 6.0);
+        InkReservior inkReservior3 = new InkReservior("Red", 4.0);
+        InkReservior newInkReservior = inkReservior1 + inkReservior3;
+        Console.WriteLine(newInkReservior);
+        InkReservior inkReservior4 = inkReservior2 - 3.0;
+        Console.WriteLine(inkReservior4);
+
     }
 }
