@@ -1,176 +1,97 @@
-﻿namespace Task91;
-using System;
+﻿using System;
 
-public interface IPaymentMethod
+public class DynamicIntArray
 {
-    bool ValidateTransaction(TransactionDetails transactionDetails);
-    decimal CalculateFee(decimal amount);
-    decimal ProcessPayment(decimal amount, TransactionDetails transactionDetails);
-}
+    private int[] _items;
+    private int _count;
 
-public class TransactionDetails
-{
-    public string CreditCardNumber { get; set; }
-    public string PaypalAccountNumber { get; set; }
-    public string BankAccountNumber { get; set; }
-}
-
-public class CreditCardPayment : IPaymentMethod
-{
-    public bool ValidateTransaction(TransactionDetails transactionDetails)
+    public DynamicIntArray(int initialCapacity = 4)
     {
-        if (string.IsNullOrEmpty(transactionDetails.CreditCardNumber))
+        _items = new int[initialCapacity];
+        _count = 0;
+    }
+    
+    public int Length => _count;
+
+    public int this[int index]
+    {
+        get
         {
-            Console.WriteLine("Invalid CreditCard Number.");
-            return false;
+            if (index < 0 || index >= _count)
+                throw new IndexOutOfRangeException("Index is out of range.");
+            return _items[index];
         }
+        set
+        {
+            if (index < 0 || index >= _count)
+                throw new IndexOutOfRangeException("Index is out of range.");
+            _items[index] = value;
+        }
+    }
+
+    
+    public void Add(int item)
+    {
+        if (_count == _items.Length)
+        {
+            Resize(_items.Length * 2);
+        }
+
+        _items[_count++] = item;
+    }
+
+    public bool Remove(int item)
+    {
+        int index = Array.IndexOf(_items, item, 0, _count);
+        if (index == -1)
+            return false; 
+
+        for (int i = index; i < _count - 1; i++)
+        {
+            _items[i] = _items[i + 1];
+        }
+
+        _items[--_count] = 0;
+        
+        if (_count > 0 && _count == _items.Length / 4)
+        {
+            Resize(_items.Length / 2);
+        }
+
         return true;
     }
-
-    public decimal CalculateFee(decimal amount)
+    private void Resize(int newCapacity)
     {
-        return amount * 0.05m; 
-    }
-
-    public decimal ProcessPayment(decimal amount, TransactionDetails transactionDetails)
-    {
-        if (ValidateTransaction(transactionDetails))
-        {
-            decimal fee = CalculateFee(amount);
-            return amount - fee;
-        }
-
-        return 0m;
-    }
-}
-
-public class PaypalPayment : IPaymentMethod
-{
-    public bool ValidateTransaction(TransactionDetails transactionDetails)
-    {
-        if (string.IsNullOrEmpty(transactionDetails.PaypalAccountNumber))
-        {
-            Console.WriteLine("Invalid PayPal Account Number.");
-            return false;
-        }
-        return true;
-    }
-
-    public decimal CalculateFee(decimal amount)
-    {
-        return amount * 0.10m; 
-    }
-
-    public decimal ProcessPayment(decimal amount, TransactionDetails transactionDetails)
-    {
-        if (ValidateTransaction(transactionDetails))
-        {
-            decimal fee = CalculateFee(amount);
-            return amount - fee;
-        }
-        return 0m;
-    }
-}
-
-public class BankTransferPayment : IPaymentMethod
-{
-    public bool ValidateTransaction(TransactionDetails transactionDetails)
-    {
-        if (string.IsNullOrEmpty(transactionDetails.BankAccountNumber))
-        {
-            Console.WriteLine("Invalid Bank Account Number.");
-            return false;
-        }
-        return true;
-    }
-
-    public decimal CalculateFee(decimal amount)
-    {
-        return amount * 0.09m; 
-    }
-
-    public decimal ProcessPayment(decimal amount, TransactionDetails transactionDetails)
-    {
-        if (ValidateTransaction(transactionDetails))
-        {
-            decimal fee = CalculateFee(amount);
-            return amount - fee;
-        }
-        return 0m;
-    }
-}
-
-public class PaymentMethodFactory
-{
-    public static IPaymentMethod GetPaymentMethod(string paymentMethodType)
-    {
-        switch (paymentMethodType.ToLower())
-        {
-            case "creditcard":
-                return new CreditCardPayment();
-            case "paypal":
-                return new PaypalPayment();
-            case "banktransfer":
-                return new BankTransferPayment();
-            default:
-                throw new ArgumentException("Invalid payment method.");
-        }
-    }
-}
-
-public class Checkout
-{
-    public void ProcessTransaction(decimal amount, string paymentMethodType, TransactionDetails transactionDetails)
-    {
-        IPaymentMethod paymentMethod = PaymentMethodFactory.GetPaymentMethod(paymentMethodType);
-
-        decimal netAmount = paymentMethod.ProcessPayment(amount, transactionDetails);
-
-        if (netAmount > 0)
-        {
-            Console.WriteLine($"Payment processed successfully! Net amount: {netAmount:C}");
-        }
-        else
-        {
-            Console.WriteLine("Payment failed.");
-        }
+        int[] newArray = new int[newCapacity];
+        Array.Copy(_items, newArray, _count);
+        _items = newArray;
     }
 }
 
 public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
         
-        var transactionDetails1 = new TransactionDetails
+        var array = new DynamicIntArray();
+        array.Add(10);
+        array.Add(20);
+        array.Add(30);
+
+        Console.WriteLine("Array numbers:");
+        for (int i = 0; i < array.Length; i++)
         {
-            CreditCardNumber = "1234-5678-9876-5432", 
-            PaypalAccountNumber = "", 
-            BankAccountNumber = ""
-        };
+            Console.WriteLine(array[i]);
+        }
 
-        var checkout = new Checkout();
-        checkout.ProcessTransaction(100m, "creditcard", transactionDetails1);
+        Console.WriteLine("Removing 20:");
+        array.Remove(20);
 
+        Console.WriteLine("Array numbers after removal:");
+        for (int i = 0; i < array.Length; i++)
+        {
+            Console.WriteLine(array[i]);
+        }
         
-        var transactionDetails2 = new TransactionDetails
-        {
-            CreditCardNumber = "",
-            PaypalAccountNumber = "user@paypal.com", 
-            BankAccountNumber = ""
-        };
-
-        checkout.ProcessTransaction(300m, "paypal", transactionDetails2);
-
-        var transactionDetails3 = new TransactionDetails
-        {
-            CreditCardNumber = "",
-            PaypalAccountNumber = "",
-            BankAccountNumber = "123456789" 
-        };
-
-        checkout.ProcessTransaction(300m, "banktransfer", transactionDetails3);
     }
 }
-
-
