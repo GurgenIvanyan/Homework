@@ -1,43 +1,130 @@
-﻿namespace Tasks72;
+﻿namespace Task82;
 
-class Product
+public class StorageSystem
 {
-    private double _price { get; set; }
-    private double _stock { get; set; }
+    public string[] Data;
 
-    public double Price
+    public StorageSystem(int capacity)
     {
-        get => _price;
-        set => _price = value < 0 ? 0 : value;
+        Data = new string[capacity];
     }
 
-    public double Stock
+    public void Add(int index, string data, User user)
     {
-        get => _stock;
-        set => _stock = value < 0 ? 10 : value;
+        if (user.Permissions("Write"))
+        {
+            if (index < Data.Length)
+            {
+                Data[index] = data;
+                Console.WriteLine("Added to Storage System");
+            }
+            else
+            {
+                Console.WriteLine("the index is out of range");
+            }
+        }
+        else
+        {
+            Console.WriteLine("You do not have permission to add data to this storage system.");
+        }
     }
 
-    public Product(double price, double stock)
+    public void Remove(int index, User user)
     {
-        Price = price;
-        Stock = stock;
+        if (user.Permissions("Delete"))
+        {
+            if (index >= 0 && index <= Data.Length)
+            {
+                Data[index] = null;
+                Console.WriteLine("Removed from Storage System");
+            }
+            else
+                {
+                    Console.WriteLine("The index is out of range");
+                }
+            }
+        else{
+            Console.WriteLine("You do not have permission to remove data from this storage system.");
+        }
     }
 
-    public override string ToString()
+    public string Read(int index, User user)
     {
-        return $"Price: {Price}, Stock: {Stock}";
+        if (user.Permissions("Read"))
+        {
+            if (index >= 0 && index <= Data.Length && Data[index] != null)
+            {
+                return Data[index];
+            }
+            else
+            {
+                Console.WriteLine("The index is out of range");
+                return null;
+            }
+        }
+        else
+        {
+            Console.WriteLine("You do not have permission to read data from this storage system.");
+            return null;
+        }
+    }
+}
+
+public class User
+{
+    public string Role { get; private set; }
+    public string[] permissions;
+
+    public User(string role)
+    {
+        Role = role;
+        permissions = SetPermissions(Role);
+    }
+
+    public string[] SetPermissions(string role)
+    {
+        switch (role)
+        {
+            case "Admin":
+                return new string[] { "Read", "Write", "Delete" };
+            case "Editor":
+                return new string[] { "Read", "Write" };
+            case "Viewer":
+                return new string[] { "Read" };
+            default:
+                return new string[] { };
+        }
+    }
+
+    public bool Permissions(string role)
+    {
+        foreach (var permission in permissions)
+        {
+            if (permission == role)
+            
+             return true;
+        }
+        return false;
     }
 }
 
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        Product p1 = new Product(10.0, 20.0);
-        Product p2 = new Product(-1, -1);
-        Console.WriteLine(p1.ToString());
-        Console.WriteLine(p2.ToString());
-        
+        User AdminUser = new User("Admin");
+        User EditorUser = new User("Editor");
+        User ViewerUser = new User("Viewer");
+        StorageSystem StorageSystem = new StorageSystem(3);
+        StorageSystem.Add(0,"Data For Admin", AdminUser);
+        Console.WriteLine(StorageSystem.Read(0,AdminUser));
+        StorageSystem.Remove(0,AdminUser);
+        StorageSystem.Add(1,"Data For Editor", EditorUser);
+        Console.WriteLine(StorageSystem.Read(1,AdminUser));
+        StorageSystem.Remove(1,AdminUser);
+        StorageSystem.Add(2, "Data For Viewer", ViewerUser);
+        Console.WriteLine(StorageSystem.Read(2,AdminUser));
+        StorageSystem.Remove(2,AdminUser);
     }
 }

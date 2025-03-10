@@ -1,86 +1,79 @@
-﻿namespace Tasks76;
-
-class Person
+﻿namespace Task86;
+public class NotificationsSystem
 {
-    public string Name { get; set; }
-    private double _id { get; set; }
+    public string[,] Notifications;
+    private int Capacity = 10;
+    private int Count = 0;
 
-    public double Id
+    public NotificationsSystem()
     {
-        get => _id;
-        set => _id = value;
-        
+        Notifications = new string[Capacity,2];
     }
 
-    public Person(string name, double id)
+    public void RegisterNotification(string UserName, string Message)
     {
-        Name = name;
-        Id = _id;
-    }
-
-    public override string ToString()
-    {
-        return $"Name: {Name}, Id: {Id}";
-    }
-}
-class ContactArray
-{
-    public Person[] contacts = new Person[10];
-    public int count = 0;
-
-    public Person this[string name]
-    {
-        get
+        if (Count < Capacity)
         {
-            for (int i = 0; i < count; i++)
+            Notifications[Count, 0] = UserName;
+            Notifications[Count, 1] = Message;
+            Count++;
+        }
+    }
+
+    public void GetNotification(string UserName)
+    {
+        bool found = false;
+        for (int i = 0; i < Count; i++)
+        {
+            if (Notifications[i, 0] == UserName)
             {
-                if (contacts[i].Name == name && contacts[i] != null)
-                {
-                    return contacts[i];
-                }
+                Console.WriteLine($"Notification for { UserName } found");
+                found = true;
             }
-            return null;
+        }
+
+        if (!found)
+        {
+            Console.WriteLine($"Notification for { UserName } not found");
         }
     }
 
-    public Person this[int id]
+    public bool HasNotification(string UserName)
     {
-        get
+        for (int i = 0; i < Count; i++)
         {
-            for (int i = 0; i < count; i++)
+            if (Notifications[i, 0] == UserName)
             {
-                if (contacts[i].Id == id)
-                {
-                    return contacts[i];
-                }
+                Console.WriteLine($"Notification for { UserName } found");
+                return true;
             }
-            return null;
         }
+        return false;
     }
 
-    public void Add(Person person)
-    {
-        contacts[count] = person;
-        count++;
-    }
-
-    public void Print()
-    {
-        for (int i = 0; i < contacts.Length; i++)
-        {
-            Console.WriteLine($"{contacts[i].Name} \t {contacts[i].Id}");
-        }
-    }
-    
 }
 
 class Program
 {
     static void Main(string[] args)
     {
-        Person person = new Person("John",1);
-        ContactArray contactArray = new ContactArray();
-        contactArray.Add(person);
-        contactArray.Print();
+        NotificationsSystem notifications = new NotificationsSystem();
+        notifications.RegisterNotification("Bob","You have been added to the notifications system");
+        notifications.GetNotification("Bob");
+        notifications.RegisterNotification("Alice", "You have been added to the notifications system");
+        notifications.GetNotification("Alice");
+        notifications.GetNotification("Hayk");
+        if(notifications.HasNotification("Bob"))
+        {
+            Console.WriteLine("Bob has a notification");
+        }
+        if (notifications.HasNotification("Hayk"))
+        {
+            Console.WriteLine("Hayk has a notification");
+        }
+        else
+        {
+            Console.WriteLine("Hayk has no notification");
+        }
     }
 }
