@@ -1,130 +1,79 @@
-﻿namespace Task82;
+﻿
 
-public class StorageSystem
+namespace Task92;
+
+public abstract class Vehicle
 {
-    public string[] Data;
+    public string Brand { get; set; } 
+    abstract public void Move();
+    abstract public void ConsumeFuel();
 
-    public StorageSystem(int capacity)
+    public Vehicle(string brand)
     {
-        Data = new string[capacity];
-    }
-
-    public void Add(int index, string data, User user)
-    {
-        if (user.Permissions("Write"))
-        {
-            if (index < Data.Length)
-            {
-                Data[index] = data;
-                Console.WriteLine("Added to Storage System");
-            }
-            else
-            {
-                Console.WriteLine("the index is out of range");
-            }
-        }
-        else
-        {
-            Console.WriteLine("You do not have permission to add data to this storage system.");
-        }
-    }
-
-    public void Remove(int index, User user)
-    {
-        if (user.Permissions("Delete"))
-        {
-            if (index >= 0 && index <= Data.Length)
-            {
-                Data[index] = null;
-                Console.WriteLine("Removed from Storage System");
-            }
-            else
-                {
-                    Console.WriteLine("The index is out of range");
-                }
-            }
-        else{
-            Console.WriteLine("You do not have permission to remove data from this storage system.");
-        }
-    }
-
-    public string Read(int index, User user)
-    {
-        if (user.Permissions("Read"))
-        {
-            if (index >= 0 && index <= Data.Length && Data[index] != null)
-            {
-                return Data[index];
-            }
-            else
-            {
-                Console.WriteLine("The index is out of range");
-                return null;
-            }
-        }
-        else
-        {
-            Console.WriteLine("You do not have permission to read data from this storage system.");
-            return null;
-        }
+        Brand = brand;
     }
 }
 
-public class User
+public class LandVehicle : Vehicle
 {
-    public string Role { get; private set; }
-    public string[] permissions;
-
-    public User(string role)
+    public LandVehicle(string brand) : base(brand){}
+    
+    public override void Move()
     {
-        Role = role;
-        permissions = SetPermissions(Role);
+        Console.WriteLine($"The {Brand} is moving on the ground");
     }
 
-    public string[] SetPermissions(string role)
+    public override void ConsumeFuel()
     {
-        switch (role)
-        {
-            case "Admin":
-                return new string[] { "Read", "Write", "Delete" };
-            case "Editor":
-                return new string[] { "Read", "Write" };
-            case "Viewer":
-                return new string[] { "Read" };
-            default:
-                return new string[] { };
-        }
-    }
-
-    public bool Permissions(string role)
-    {
-        foreach (var permission in permissions)
-        {
-            if (permission == role)
-            
-             return true;
-        }
-        return false;
+        Console.WriteLine($"The {Brand} is consuming petrol");
     }
 }
 
+public class WaterVehicle : Vehicle
+{
+    public WaterVehicle(string brand) : base(brand){}
+    public override void Move()
+    {
+        Console.WriteLine($"The {Brand} is moving on the water");
+        
+    }
+
+    public override void ConsumeFuel()
+    {
+        Console.WriteLine($"The {Brand} is consuming fuel");
+    }
+}
+
+public class AirVehicle : Vehicle
+{
+    public AirVehicle(string brand) : base(brand){}
+    public override void Move()
+    {
+        Console.WriteLine($"The {Brand} is moving on the air");
+    }
+
+    public override void ConsumeFuel()
+    {
+        Console.WriteLine($"The {Brand} is consuming disel");
+    }
+}
 
 class Program
 {
     static void Main(string[] args)
     {
-        User AdminUser = new User("Admin");
-        User EditorUser = new User("Editor");
-        User ViewerUser = new User("Viewer");
-        StorageSystem StorageSystem = new StorageSystem(3);
-        StorageSystem.Add(0,"Data For Admin", AdminUser);
-        Console.WriteLine(StorageSystem.Read(0,AdminUser));
-        StorageSystem.Remove(0,AdminUser);
-        StorageSystem.Add(1,"Data For Editor", EditorUser);
-        Console.WriteLine(StorageSystem.Read(1,AdminUser));
-        StorageSystem.Remove(1,AdminUser);
-        StorageSystem.Add(2, "Data For Viewer", ViewerUser);
-        Console.WriteLine(StorageSystem.Read(2,AdminUser));
-        StorageSystem.Remove(2,AdminUser);
+        // Creating instances of each vehicle type
+        LandVehicle landVehicle = new LandVehicle("Toyota");
+        WaterVehicle waterVehicle = new WaterVehicle("Yacht");
+        AirVehicle airVehicle = new AirVehicle("Boeing");
+
+        Vehicle[] vehicles = new Vehicle[] { landVehicle, waterVehicle, airVehicle };
+
+       
+        foreach (var vehicle in vehicles)
+        {
+            vehicle.Move();
+            vehicle.ConsumeFuel();
+        }
     }
 }

@@ -1,74 +1,57 @@
-﻿namespace Task83;
+﻿namespace Task93;
 
-public class Grid
+public  class SecurySystem
 {
-    private int[,] grid{get;set;}
-    private int Rows{get;set;}
-    private int Cols{get;set;}
+    public string Name { get; set; }
+    public string Role { get; set; }
+    public int[] data;
 
-    public Grid(int rows, int cols)
+    public SecurySystem(string name, string role)
     {
-        Rows = rows;
-        Cols = cols;
-        grid = new int[Rows, Cols];
+        Name = name;
+        Role = role;
+        data = new int[10];
     }
 
-    public int this[int row, int col]
+    public int this[int index]
     {
         get
         {
-            if (row < 0 || row >= Rows || col < 0 || col >= Cols)
+            if (Role == "Admin" || Role == "User" || Role == "Guest")
             {
-                throw new IndexOutOfRangeException();
+                return data[index];
             }
-            return grid[row, col];
+            else
+            {
+                return 0;
+            }
         }
         set
         {
-            if (col < Rows && col > -1)
+            if (Role == "Admin" && index >=0 && index < data.Length)
             {
-                grid[row, col] = value;
+                data[index] = value;
+            }
+            else
+            {
+                Console.WriteLine("your role is invalid");
+                return;
             }
         }
     }
 
-    public int[] GetRow(int row)
+    public string HasPermission(string Role)
     {
-        if (row < 0 || row >= Rows)
+        switch (Role)
         {
-            throw new IndexOutOfRangeException();
-        }
-        int[] RowValues = new int[Cols];
-        for (int i = 0; i < Rows; i++)
-        {
-            RowValues[i] = grid[row, i];
-        }
-        return RowValues;
-    }
-
-    public int[] GetCol(int col)
-    {
-        if (col < 0 || col >= Cols)
-        {
-            throw new IndexOutOfRangeException();
-        }
-        int[] ColValues = new int[Rows];
-        for (int i = 0; i < Cols; i++)
-        {
-            ColValues[i] = grid[i, col];
-        }
-        return ColValues;
-    }
-
-    public void Display()
-    {
-        for (int i = 0; i < Rows; i++)
-        {
-            for (int j = 0; j < Cols; j++)
-            {
-                Console.Write($"{grid[i, j]} ");
-            }
-            Console.WriteLine();
+            case "Admin":
+                return "The administrator has permission to override the value of the product";
+            case "User":
+                return "The user has permission to buy the product.";
+            case "Guest":
+                return "The guest has no permissions";
+            default:
+                return "invalid Role";
         }
     }
 }
@@ -76,30 +59,17 @@ public class Grid
 class Program
 {
     static void Main(string[] args)
-    {   
-        Grid grid = new Grid(3, 3);
-        Console.WriteLine("Enter number of rows: ");
-        int rows = int.Parse(Console.ReadLine());
-        Console.WriteLine("Enter number of cols: ");
-        int cols = int.Parse(Console.ReadLine());
-        Console.WriteLine("Enter numbers of grid: ");
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                grid[i, j] = int.Parse(Console.ReadLine());
-            }
-            Console.WriteLine();
-        }
-        grid.Display();
-        Console.WriteLine("Enter row that you want to see:");
-        int row = int.Parse(Console.ReadLine());
-        int[] RowValues=grid.GetRow(row);
-        Console.WriteLine($"Row {row}: " + string.Join(", ", RowValues));
-        Console.WriteLine("Enter col that you want to see:");
-        int col = int.Parse(Console.ReadLine());
-        int[] ColValues = grid.GetCol(col);
-        Console.WriteLine($"Col {col}: " + string.Join(", ", ColValues));
+    {
+        
+        SecurySystem admin = new SecurySystem("John", "Admin");
+        SecurySystem user= new SecurySystem("Bob", "User");
+        SecurySystem guest = new SecurySystem("Guest", "Guest");
+        Console.WriteLine(admin.HasPermission("Admin"));
+        Console.WriteLine(user.HasPermission("User"));
+        Console.WriteLine(guest.HasPermission("Guest"));
+        admin[0] = 15;
+        Console.WriteLine(admin[0]);
+        user[2] = 24;
         
     }
 }
