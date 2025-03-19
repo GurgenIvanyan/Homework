@@ -1,111 +1,143 @@
-﻿public class Parent
-{
-    public string Name{get;set;}
-    public int Age{get;set;}
-    public double salary{get;set;}
+﻿namespace _arajadranq2;
 
-    public Parent(string name, int age, double salary)
+public class Course
+{
+    public string Name { get; set; }
+    public int Monthfee{get; set;}
+    public Modul[] Moduls { get; set; }
+
+    public Course(string name, int monthfee, Modul[] moduls)
     {
         Name = name;
-        Age = age;
-        this.salary = salary;
+        Monthfee = monthfee;
+        Moduls = moduls;
+    }
+}
+
+public class Modul
+{
+    public string Title { get; set; }
+    public double Duration{get; set;}
+
+    public Modul(string title, double duration)
+    {
+        Title = title;
+        Duration = duration;
+    }
+}
+
+public class Web : Course
+{
+    public string Type{get; set;}
+
+    public Web(string name, int monthfee, string Type,Modul[] moduls) : base(name, monthfee, moduls)
+    {
+        this.Type = Type;
+    }
+}
+
+public class Game : Course
+{
+    public string Engine{get; set;}
+
+    public Game(string name, int monthfee,string Engine,Modul[] moduls) : base(name, monthfee, moduls)
+    {
+        this.Engine = Engine;
+    }
+}
+
+public class Group
+{
+    public int StudentCount { get; set; }
+    public string Name;
+    public Course Course { get; set; }
+
+    public Group(string name, int studentCount, Course course)
+    {
+        Name = name;
+        Course = course;
+        StudentCount = studentCount;
     }
     
 }
-
-public class Child
+public class Ai:Course
 {
-    public string Name{get;set;}
-    public int Age{get;set;}
-    public Parent Father{get;set;}
-    public Parent Mother{get;set;}
-
-    public Child(string name, int age,Parent Mother,Parent Father)
+    public Ai(string name, int monthfee, Modul[] moduls) : base(name, monthfee, moduls)
     {
-        Name = name;
-        Age = age;
-        this.Father = Father;
-        this.Mother = Mother;
+        
     }
-
-    public double FamilyIncome()
-    {
-        return Father.salary + Mother.salary;
-    }
+    
 }
-
 class Program
 {
     static void Main(string[] args)
     {
-        Child[] children = new Child[]
+        Course[] courses = new Course[]
         {
-            new Child("Tigran", 13, new Parent("Anna", 32, 270000), new Parent("Arman", 44, 500000)),
-            new Child("Narek", 10, new Parent("Mariam", 30, 200000), new Parent("Gor", 39, 400000)),
-            new Child("Sona", 15, new Parent("Lusine", 35, 320000), new Parent("Hayk", 38, 450000)),
-            new Child("Ani", 12, new Parent("Nune", 28, 430000), new Parent("Samvel", 36, 450000)),
-            new Child("Arman", 9, new Parent("Seda", 29, 280000), new Parent("Karen", 33, 330000)),
-            new Child("David", 14, new Parent("Elina", 31, 270000), new Parent("Arsen", 42, 480000)),
-            new Child("Lilit", 11, new Parent("Margarita", 26, 260000), new Parent("Gevorg", 34, 370000)),
-            new Child("Artur", 16, new Parent("Tatevik", 30, 310000), new Parent("Harut", 41, 490000)),
-            new Child("Hayk", 8, new Parent("Gayane", 27, 220000), new Parent("Tigran", 32, 300000)),
-            new Child("Emma", 17, new Parent("Ani", 33, 290000), new Parent("Vahagn", 45, 510000)),
+            new Web("Frontend Development", 500000, "frontend", new Modul[]
+            {
+                new Modul("HTML & CSS", 2), new Modul("JavaScript", 3)
+            }),
+            new Web("Fullstack Development", 60000, "fullstack", new Modul[]
+            {
+                new Modul("Node.js", 4), new Modul("React", 5)
+            }),
+            new Ai("Machine Learning", 80000, new Modul[]
+            {
+                new Modul("Python for AI", 6), new Modul("Deep Learning", 8)
+            }),
+            new Game("Game Development", 72000, "Unity", new Modul[]
+            {
+                new Modul("C# for Unity", 5), new Modul("Physics in Games", 4)
+            }),
+            new Game("Game Dev Advanced", 42000, "Unreal", new Modul[]
+            {
+                new Modul("Blueprints", 6), new Modul("C++ for Unreal", 7)
+            })
         };
-        foreach (var child in children)
+
+        Group[] groups = new Group[]
         {
-            if (child.Father.Age + child.Mother.Age <= 70)
+            new Group("Frontend Group 1", 15, courses[0]),
+            new Group("Fullstack Group 1", 12, courses[1]),
+            new Group("AI Group 1", 10, courses[2]),
+            new Group("Game Dev Group 1", 20, courses[3]),
+            new Group("Game Dev Group 2", 18, courses[4])
+        };
+        int WebMembersCount = 0;
+        for (int i = 0; i < groups.Length; i++)
+        {
+            if (groups[i].Course is Web)
             {
-                Console.WriteLine($"{child.Name}, {child.Age}");
+                WebMembersCount += groups[i].StudentCount;
             }
         }
 
-        // Find the oldest child
-        var oldestChild = children[0];
-        for (int i = 0; i < children.Length; i++)
+        Console.WriteLine("Web members count: " + WebMembersCount);
+        double IncomeFromGame = 0;
+        for (int i = 0; i < groups.Length; i++)
         {
-            if (children[i].Age > oldestChild.Age)
-                oldestChild = children[i];
-        }
-
-        // Check if Father is null before accessing its properties
-        if (oldestChild.Father != null)
-        {
-            Console.WriteLine($"Oldest child's father's salary: {oldestChild.Father.salary}");
-        }
-        else
-        {
-            Console.WriteLine("Father is null for the oldest child.");
-        }
-
-        // Find the richest family
-        var richestFamily = children[0];
-        for (int i = 0; i < children.Length; i++)
-        {
-            if (children[i].FamilyIncome() > richestFamily.FamilyIncome())
+            if (groups[i].Course is Game game && game.Engine == "Unreal")
             {
-                richestFamily = children[i];
+                IncomeFromGame += groups[i].StudentCount * groups[i].Course.Monthfee;
+            }
+        }
+        Console.WriteLine($"Income from game: {IncomeFromGame}");
+        int maxMember = 0;
+        foreach (var group in groups)
+        {
+            if (group.StudentCount > maxMember)
+            {
+                maxMember = group.StudentCount;
             }
         }
 
-        Console.WriteLine($"Richest family child: {richestFamily.Name}, {richestFamily.Age}");
-
-        int youngestChild = 0;
-        int oldestChild_ = 0;
-        for (int i = 0; i < children.Length; i++)
+        for (int i = 0; i < groups.Length; i++)
         {
-            if (children[i].Age < children[youngestChild].Age) youngestChild = i;
-            if (children[i].Age > children[oldestChild_].Age) oldestChild_ = i;
-        }
-
-        
-        Child temp = children[youngestChild];
-        children[youngestChild] = children[oldestChild_];
-        children[oldestChild_] = temp;
-
-        
-        foreach (var child in children)
-        {
-            Console.WriteLine($"{child.Name}, {child.Age}");
+            if (groups[i].StudentCount == maxMember)
+            {
+                Console.WriteLine($"the most popolar Cours is  {groups[i].Course.Name} with {groups[i].StudentCount} students");
+            }
         }
     }
 }
