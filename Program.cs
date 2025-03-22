@@ -1,87 +1,263 @@
-﻿namespace arajadranq4;
+﻿using System;
+using System.Text;
 
-public abstract class Shape
+namespace Gorcnakan15._03
 {
-    public abstract double Surface();
-    public abstract void Draw();
-
-    public void print()
+    public enum Enumerate
     {
-     Console.WriteLine($"{GetType().Name}   S={Surface()}");
-     Console.WriteLine();
-     Draw();
-    }
-}
-
-public class Square : Shape
-{
-    private double side { get; set; }
-
-    public Square(double side)
-    {
-        this.side = side;
+        CaseSensitive,
+        ReverseComparer,
+        Whitespace,
+        InsensitiveComparer
     }
 
-    public override double Surface()
+    public class Mystring
     {
-        return side * side;
-    }
+        private int Size;
+        private char[] _string;
+        public int Length => _string.Length;
+        public bool Empty => _string.Length == 0;
 
-    public override void Draw()
-    {
-        for (int i = 0; i < side; i++)
+        public Mystring()
         {
-            for (int j = 0; j < side; j++)
+            Size = 5;
+            _string = new char[Size];
+        }
+
+        public Mystring(char[] str)
+        {
+            _string = new char[str.Length];
+            for (int i = 0; i < str.Length; i++)
             {
-                Console.Write("*");
+                _string[i] = str[i];
             }
-
-            Console.WriteLine();
-        }
-    }
-}
-
-public class Rectangle : Shape
-    {
-        private double Width{ get; set; }
-        private double Height{ get; set; }
-
-        public Rectangle(double height, double width)
-        {
-            Height = height;
-            Width = width;
         }
 
-        public override double Surface()
+        public Mystring(string[] str)
         {
-            return Height * Width;
+            string array = string.Join("", str);
+            _string = array.ToCharArray();
         }
 
-        public override void Draw()
+        public Mystring(char[] str, int index, int count)
         {
-            for (int i = 0; i < Height; i++)
+            if (index < 0 || index >= str.Length)
             {
-                for (int j = 0; j < Width; j++)
+                throw new IndexOutOfRangeException();
+            }
+            _string = new char[count];
+            Array.Copy(str, index, _string, 0, count);
+        }
+
+        public Mystring(Mystring str, int index, int count)
+        {
+            if (str.Empty)
+            {
+                throw new ArgumentException("String is empty");
+            }
+            else if (index < 0 || index >= str.Length)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            _string = new char[count];
+            Array.Copy(str._string, index, _string, 0, count);
+        }
+
+        public char this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= Size)
                 {
-                    Console.Write("*");
+                    throw new IndexOutOfRangeException();
                 }
-                Console.WriteLine();
+                return _string[index];
             }
+        }
+
+        public static int MyCompare(Mystring a, Mystring b, Enumerate arate)
+        {
+            if (a.Empty || b.Empty)
+            {
+                throw new ArgumentException("One of these strings is empty");
+            }
+
+            int Length = a.Length <= b.Length ? a.Length : b.Length;
+            string copyA = new string(a._string);
+            string copyB = new string(b._string);
+            switch (arate)
+            {
+                case Enumerate.CaseSensitive:
+                    break;
+                case Enumerate.ReverseComparer:
+                    copyA = new string(copyA.Reverse().ToArray());
+                    copyB = new string(copyB.Reverse().ToArray());
+                    break;
+                case Enumerate.Whitespace:
+                    copyA = copyA.Trim();
+                    copyB = copyB.Trim();
+                    break;
+                case Enumerate.InsensitiveComparer:
+                    copyA = copyA.ToLower();
+                    copyB = copyB.ToLower();
+                    break;
+                default:
+                    Console.WriteLine("Invalid case");
+                    throw new Exception("Invalid option");
+            }
+
+            for (int i = 0; i < Length; i++)
+            {
+                if (copyA[i] != copyB[i])
+                {
+                    return copyA[i] < copyB[i] ? -1 : 1;
+                }
+            }
+
+            if (copyA.Length == copyB.Length)
+            {
+                return 0;
+            }
+
+            return copyA.Length < copyB.Length ? -1 : 1;
+        }
+
+        public static bool operator ==(Mystring a, Mystring b)
+        {
+            if (a.Empty || b.Empty)
+            {
+                throw new ArgumentException("One of these strings is empty");
+            }
+
+            return MyCompare(a, b, Enumerate.CaseSensitive) == 0;
+        }
+
+        public static bool operator !=(Mystring a, Mystring b)
+        {
+            return !(a == b);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null || (this.GetType() != obj.GetType()))
+            {
+                throw new ArgumentException("Object must be of type Mystring");
+            }
+
+            return this == (Mystring)obj;
+        }
+
+        public static bool Equals(Mystring a, Mystring b)
+        {
+            if (a.Empty || b.Empty)
+            {
+                throw new ArgumentException("One of these strings is empty");
+            }
+
+            return new string(a._string).Equals(new string(b._string));
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() ^ 11;
+        }
+
+        public static string Join(Mystring[] array, char separator)
+        {
+            StringBuilder substring = new StringBuilder();
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i].Empty)
+                {
+                    continue;
+                }
+
+                if (i == array.Length - 1)
+                {
+                    substring.Append(array[i].ToString());
+                    continue;
+                }
+                substring.Append(array[i].ToString());
+                substring.Append(separator);
+            }
+            return substring.ToString();
+        }
+
+        public bool EndsWith(string str)
+        {
+            if (this.Empty)
+            {
+                return false;
+            }
+
+            if (_string.Length < str.Length)
+            {
+                Console.WriteLine("String too short");
+                return false;
+            }
+
+            for (int i = _string.Length - str.Length, j = 0; j < str.Length; j++, i++)
+            {
+                if (str[j] != _string[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool StartsWith(string str)
+        {
+            if (this.Empty)
+            {
+                return false;
+            }
+
+            if (_string.Length < str.Length)
+            {
+                Console.WriteLine("String too short");
+            }
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] != _string[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public static Mystring operator +(Mystring a, Mystring b)
+        {
+            if (a.Empty || b.Empty)
+            {
+                throw new ArgumentException("One of these strings is empty");
+            }
+
+            string str = new string(a._string) + new string(b._string);
+            return new Mystring(str.ToCharArray());
+        }
+
+        public override string ToString()
+        {
+            return new string(_string);
         }
     }
 
-
-
-class Program
-{
-    static void Main(string[] args)
+    class Program
     {
-        Shape[] shapes = new Shape[2];
-        shapes[0] = new Square(5);
-        shapes[1] = new Rectangle(3, 4);
-        foreach (Shape shape in shapes)
+        static void Main(string[] args)
         {
-            shape.print();
+            char[] arr = new char[] { 'H', 'E', 'L', 'L', 'O' };
+            char[] arr2 = new char[] { 'h', 'e', 'l', 'l', 'o' };
+            Mystring mystring = new Mystring(arr);
+            Mystring mystring1 = new Mystring(arr2);
+
+            if (Mystring.MyCompare(mystring, mystring1, Enumerate.InsensitiveComparer) == 0)
+            {
+                Console.WriteLine("The strings are equal");
+            }
         }
     }
 }
