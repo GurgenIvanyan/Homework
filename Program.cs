@@ -1,70 +1,98 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
-class TicketBookingSystem
-{
-    private static List<int> tickets = Enumerable.Range(1, 100).ToList();
-    private static object lockObject = new object();
-    private static SemaphoreSlim semaphore = new SemaphoreSlim(4); 
+namespace Queue;
 
-    static void Main()
+public class MyQueue<T>
+{      
+    private class Node
     {
-        Console.WriteLine("Ticket booked please wait...\n");
+        public T Value;
+        public Node? Next;
 
-       
-        List<Thread> threads = new List<Thread>();
-        for (int i = 1; i <= 10; i++)
+        public Node(T value)
         {
-            int userId = i;
-            Thread thread = new Thread(() => BookTickets(userId));
-            threads.Add(thread);
-            thread.Start();
+            Value = value;
+            Next = null;
         }
-
-        foreach (var thread in threads)
-        {
-            thread.Join();
-        }
-
-        Console.WriteLine("\n all tickets are booked.\n։");
     }
 
-    private static void BookTickets(int userId)
+    private Node? _head;
+    private Node? _tail;
+    private int _count;
+
+    public MyQueue()
     {
-      
-        semaphore.Wait();
-        try
-        {
-            while (true)
-            {
-                int ticketNumber = -1;
+        _head = null;
+        _tail = null;
+        _count = 0;
+    }
 
-                
-                lock (lockObject)
-                {
-                    if (tickets.Count > 0)
-                    {
-                        ticketNumber = tickets[0];
-                        tickets.RemoveAt(0);
-                    }
-                    else
-                    {
-                        break; 
-                    }
-                }
+    public int Count => _count;
 
-                if (ticketNumber != -1)
-                {
-                    Console.WriteLine($"user {userId} booked{ticketNumber}։");
-                    Thread.Sleep(50); 
-               }
-            }
-        }
-        finally
+    public bool IsEmpty()
+    {
+        return _count == 0;
+    }
+
+    public void Enqueue(T item)
+    {
+        Node newNode = new Node(item);
+
+        if (_tail != null)
         {
-            semaphore.Release();
+            _tail.Next = newNode;
         }
+
+        _tail = newNode;
+
+        if (_head == null)
+        {
+            _head = _tail;
+        }
+
+        _count++;
+    }
+
+    public T Dequeue()
+    {
+        if (IsEmpty())
+            throw new InvalidOperationException("Queue is empty.");
+
+        T value = _head!.Value;
+        _head = _head.Next;
+
+        if (_head == null)
+        {
+            _tail = null;
+        }
+
+        _count--;
+        return value;
+    }
+
+    public T Peek()
+    {
+        if (IsEmpty())
+            throw new InvalidOperationException("Queue is empty.");
+
+        return _head!.Value;
+    }
+
+    public void Clear()
+    {
+        _head = null;
+        _tail = null;
+        _count = 0;
+    }
+
+    public void Print()
+    {
+        Node? current = _head;
+        while (current != null)
+        {
+            Console.Write($"{current.Value} ");
+            current = current.Next;
+        }
+        Console.WriteLine();
     }
 }
